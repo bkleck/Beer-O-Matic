@@ -72,8 +72,13 @@ char ReadCurrent() {
 }
 
 
+/* Function to read the IR sensors
+ * IR sensors are connected to analog pins giving raw integer values
+ * I defined HIGH as the initial reading of IR1 at startup
+ * and the current reading as LOW when current reading goes below 100 of initial reading
+ */
 bool ReadIRSensor(int IR_pin) {
-  int light_reading = analogRead(IR1);
+  int light_reading = analogRead(IR_pin);
   if (light_reading <= init_light_reading - 100) {
     Serial.println("Something fat passed by: " + IR_pin);
     return 0;
@@ -89,6 +94,7 @@ void setup() {
   pinMode(12, INPUT_PULLUP);
   pinMode(11, INPUT_PULLUP);
   pinMode(A1, INPUT_PULLUP);
+  pinMode(A2, INPUT_PULLUP);
   myProDriver.begin();
   init_light_reading = analogRead(IR1);
   Startup();
@@ -121,13 +127,14 @@ void loop() {
     else if (targetIndex < currentIndex) {
       dir = 0;
     }
+
+    if (targetPos == currentPos) {
+      Serial.println("reached target");
+    }
+    else {
+      myProDriver.step(1, dir);
+    }
   }
 
-  if (targetPos == currentPos) {
-    Serial.println("reached target");
-  }
-  else {
-    myProDriver.step(1, dir);
-  }
   delay(500);
 }
