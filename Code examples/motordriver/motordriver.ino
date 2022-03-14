@@ -18,25 +18,57 @@
 #include <ezButton.h>
 PRODRIVER myProDriver; //Create instance of driver
 
-const int limitSwitchPin = 12;
+const int leftLimit = 12;
+const int rightLimit = 11;
 bool limit;
+int dir;
+
+/* function to call when the circuit is first turned on
+ *  this will turn the motor anticlockwise towards the left limit
+ *  stops when it hits the left limit
+ */
+void Startup(int leftLimit) {
+
+  while (ReadPin(leftLimit)) {
+    myProDriver.step(200, 0);
+  }
+
+  Serial.println("reached left limit");
+}
+
+
+// function to read digital pins, returning 1 or 0
+bool ReadPin(int pinNumber) {
+  bool result = digitalRead(pinNumber);
+  return result;
+}
+
+
 
 void setup() {
   Serial.begin(115200);
   pinMode(12, INPUT_PULLUP);
+  pinMode(11, INPUT_PULLUP);
   myProDriver.begin();
 }
 
 void loop() {
-  limit = digitalRead(limitSwitchPin);
-  if (limit == LOW) {
-    Serial.println("reached limit");
-    myProDriver.step(0, 0);
-    myProDriver.disable();
-  }
+  Startup(leftLimit);
 
-  else {
-    myProDriver.enable();
-    myProDriver.step(200, 0);
-  }
+  
+
+  
+//  limit_1 = digitalRead(leftLimit);
+//  limit_2 = digitalRead(rightLimit);
+//  
+//  if (limit == LOW) {
+//    Serial.println("reached limit");
+//    delay(3000);
+//    
+//    myProDriver.step(-200, 0);
+//  }
+//
+//  else {
+//    myProDriver.step(200, 0);
+//  }
 }
