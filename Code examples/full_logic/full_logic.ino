@@ -5,7 +5,9 @@ PRODRIVER myProDriver; //Create instance of driver
 const int leftLimit = 12;
 const int rightLimit = 11;
 const int IR1 = A0;
+const int IR2 = A3;
 const int Button1 = A1;
+const int Button2 = A2;
 
 bool limit;
 int dir = 0;
@@ -14,6 +16,8 @@ int init_light_reading;
 String currentPos;
 String targetPos;
 const char *sequence[5] = {"LEFT", "1", "2", "3", "RIGHT"};
+int currentIndex;
+int targetIndex;
 
 /* function to call when the circuit is first turned on
  *  this will turn the motor anticlockwise towards the left limit
@@ -42,6 +46,10 @@ char ReadTarget() {
   if (ReadPin(Button1) == LOW) {
     targetPos = "1";
   }
+
+  else if (ReadPin(Button2) == LOW) {
+    targetPos = "2";
+  }
 }
 
 // function to set the current position whenever a limit switch or IR sensor is activated
@@ -56,6 +64,10 @@ char ReadCurrent() {
 
   else if (ReadIRSensor(IR1) == LOW) {
     currentPos = "1";
+  }
+
+  else if (ReadIRSensor(IR2) == LOW) {
+    currentPos = "2";
   }
 }
 
@@ -79,7 +91,7 @@ void setup() {
   pinMode(A1, INPUT_PULLUP);
   myProDriver.begin();
   init_light_reading = analogRead(IR1);
-  // Startup();
+  Startup();
 }
 
 void loop() {
@@ -91,15 +103,31 @@ void loop() {
   Serial.println(currentPos);
   Serial.print("target position: "); 
   Serial.println(targetPos);
-  delay(1000);
-  if (targetPos) {
-    
+
+  if (targetPos != NULL) {
+    for (int i=0; i < 5; i++) {
+      if (targetPos == sequence[i]) {
+        targetIndex = i;
+      }
+      else if (currentPos == sequence[i]) {
+        currentIndex = i;
+      }
+    }
+
+    if (targetIndex > currentIndex) {
+      dir = 1;
+    }
+
+    else if (targetIndex < currentIndex) {
+      dir = 0;
+    }
   }
 
-  
-
+  if (targetPos == currentPos) {
+    Serial.println("reached target");
+  }
   else {
-    Serial.println("reached right limit");
+    myProDriver.step(1, dir);
   }
-  
+  delay(500);
 }
