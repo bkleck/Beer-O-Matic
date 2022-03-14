@@ -21,19 +21,20 @@ PRODRIVER myProDriver; //Create instance of driver
 const int leftLimit = 12;
 const int rightLimit = 11;
 bool limit;
-int dir;
+int dir = 0;
 
 /* function to call when the circuit is first turned on
  *  this will turn the motor anticlockwise towards the left limit
  *  stops when it hits the left limit
  */
-void Startup(int leftLimit) {
-
+void Startup() {
   while (ReadPin(leftLimit)) {
-    myProDriver.step(200, 0);
+    myProDriver.step(200, dir);
   }
 
   Serial.println("reached left limit");
+  dir = dir + 1;
+  delay(3000);
 }
 
 
@@ -50,25 +51,16 @@ void setup() {
   pinMode(12, INPUT_PULLUP);
   pinMode(11, INPUT_PULLUP);
   myProDriver.begin();
+  Startup();
 }
 
 void loop() {
-  Startup(leftLimit);
+  if (ReadPin(rightLimit)) {
+    myProDriver.step(200, dir);
+  }
 
+  else {
+    Serial.println("reached right limit");
+  }
   
-
-  
-//  limit_1 = digitalRead(leftLimit);
-//  limit_2 = digitalRead(rightLimit);
-//  
-//  if (limit == LOW) {
-//    Serial.println("reached limit");
-//    delay(3000);
-//    
-//    myProDriver.step(-200, 0);
-//  }
-//
-//  else {
-//    myProDriver.step(200, 0);
-//  }
 }
