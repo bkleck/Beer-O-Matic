@@ -1,5 +1,8 @@
+using namespace std;
 #include "SparkFun_ProDriver_TC78H670FTG_Arduino_Library.h"
 #include <ezButton.h>
+#include <vector>
+
 PRODRIVER myProDriver; //Create instance of driver
 
 const int leftLimit = 12;
@@ -16,6 +19,9 @@ int init_light_reading;
 String currentPos;
 String targetPos;
 const char *sequence[5] = {"LEFT", "1", "2", "3", "RIGHT"};
+std::vector<char> myList = {"LEFT", "1", "2", "3", "RIGHT"};
+Serial.println(myList);
+const char *targetQueue[3];
 int currentIndex;
 int targetIndex;
 
@@ -25,7 +31,7 @@ int targetIndex;
  */
 void Startup() {
   while (ReadPin(leftLimit)) {
-    myProDriver.step(1, dir);
+    myProDriver.step(200, dir);
   }
 
   Serial.println("reached left limit");
@@ -41,7 +47,8 @@ bool ReadPin(int pinNumber) {
   return result;
 }
 
-// function to set the target position whenever a button is read HIGH
+
+// function to set the target position whenever a button is read LOW due to PULLUP mode
 char ReadTarget() {
   if (ReadPin(Button1) == LOW) {
     targetPos = "1";
@@ -52,7 +59,9 @@ char ReadTarget() {
   }
 }
 
+
 // function to set the current position whenever a limit switch or IR sensor is activated
+// as the pins are on PULLUP mode, they are activated when read as LOW
 char ReadCurrent() {
   if (ReadPin(leftLimit) == LOW) {
     currentPos = "LEFT";
@@ -89,27 +98,34 @@ bool ReadIRSensor(int IR_pin) {
 }
 
 
-void setup() {
-  Serial.begin(115200);
-  pinMode(12, INPUT_PULLUP);
-  pinMode(11, INPUT_PULLUP);
-  pinMode(A1, INPUT_PULLUP);
-  pinMode(A2, INPUT_PULLUP);
-  myProDriver.begin();
-  init_light_reading = analogRead(IR1);
-  Startup();
+
+boolean arrayIncludeElement(int array[], int element) {
+  for (int i = 0; i < max; i++) {
+      if (array[i] == element) {
+          return true;
+      }
+    }
+  return false;
+  }
+
+
+void AddToQueue() {
+  if (arrayIncludeElement(sequence, targetPos) == false) {
+    
+  }
 }
 
-void loop() {
-  Serial.println(ReadPin(Button1));
 
-  ReadTarget();
-  ReadCurrent();
-  Serial.print("current position: " ); 
-  Serial.println(currentPos);
-  Serial.print("target position: "); 
-  Serial.println(targetPos);
-
+/*
+ * function to move to target position 
+ * get the index of the target and current position within the sequence array
+ * if the target index is greater, means it should move to the right
+ * if the target index is smaller, means it should move left
+ * 
+ * if the target position is equal to current position, the motor will not move
+ * if not it will move based on the direction given above
+ */
+void MoveToTarget() {
   if (targetPos != NULL) {
     for (int i=0; i < 5; i++) {
       if (targetPos == sequence[i]) {
@@ -135,6 +151,30 @@ void loop() {
       myProDriver.step(1, dir);
     }
   }
+}
 
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(12, INPUT_PULLUP);
+  pinMode(11, INPUT_PULLUP);
+  pinMode(A1, INPUT_PULLUP);
+  pinMode(A2, INPUT_PULLUP);
+  myProDriver.begin();
+  init_light_reading = analogRead(IR1);
+  Startup();
+}
+
+void loop() {
+  Serial.println(ReadPin(Button1));
+
+  ReadTarget();
+  ReadCurrent();
+  Serial.print("current position: " ); 
+  Serial.println(currentPos);
+  Serial.print("target position: "); 
+  Serial.println(targetPos);
+
+  MoveToTarget();
   delay(500);
 }
