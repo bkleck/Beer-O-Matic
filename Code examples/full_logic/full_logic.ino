@@ -1,9 +1,5 @@
-#include <Arduino_AVRSTL.h>
 #include "SparkFun_ProDriver_TC78H670FTG_Arduino_Library.h"
 #include <ezButton.h>
-#include <iostream>
-#include <algorithm>
-using namespace std;
 
 PRODRIVER myProDriver; //Create instance of driver
 
@@ -19,10 +15,10 @@ bool limit;
 int dir = 0;
 int init_light_reading;
 
-String currentPos;
-String targetPos;
-const char *sequence[5] = {"LEFT", "1", "2", "3", "RIGHT"};
-const char *targetQueue[3];
+int currentPos;
+int targetPos;
+const int sequence[5] = {0, 1, 2, 3, 4};
+int targetQueue[3];
 int currentIndex;
 int targetIndex;
 
@@ -36,7 +32,7 @@ void Startup() {
   }
 
   Serial.println("reached left limit");
-  currentPos = "LEFT";
+  currentPos = 0;
   dir = dir + 1;
   delay(3000);
 }
@@ -52,18 +48,28 @@ bool ReadPin(int pinNumber) {
 // function to set the target position whenever a button is read LOW due to PULLUP mode
 char ReadTarget() {
   if (ReadPin(Button1) == LOW) {
-    int n = sizeof(targetQueue) / sizeof(*targetQueue);
-    bool exists = std::find(targetQueue, targetQueue + n, 3) != targetQueue + n;
-    if (exists) {
-        std::cout << "Element found";
-    } else {
-        targetQueue[queueSize++] = "1";
+    bool elementInside = false;
+    for (int i = 0; i < 3; i++) {
+      if (targetQueue[i] == 1) {
+        elementInside = true;
+      }
+    }
+    if (elementInside == false) {
+      targetQueue[queueSize++] = 1;
     }
 }
 
   else if (ReadPin(Button2) == LOW) {
-    targetQueue[queueSize++] = "2";
-  }
+    bool elementInside = false;
+    for (int i = 0; i < 3; i++) {
+      if (targetQueue[i] == 2) {
+        elementInside = true;
+      }
+    }
+    if (elementInside == false) {
+      targetQueue[queueSize++] = 2;
+    }
+}
 }
 
 
@@ -71,19 +77,19 @@ char ReadTarget() {
 // as the pins are on PULLUP mode, they are activated when read as LOW
 char ReadCurrent() {
   if (ReadPin(leftLimit) == LOW) {
-    currentPos = "LEFT";
+    currentPos = 0;
   }
   
   else if (ReadPin(rightLimit) == LOW) {
-    currentPos = "RIGHT";
+    currentPos = 4;
   }
 
   else if (ReadIRSensor(IR1) == LOW) {
-    currentPos = "1";
+    currentPos = 1;
   }
 
   else if (ReadIRSensor(IR2) == LOW) {
-    currentPos = "2";
+    currentPos = 2;
   }
 }
 
@@ -155,6 +161,7 @@ void setup() {
 }
 
 void loop() {
+  Serial.println(sizeof(targetQueue));
   for (int i=0; i<3; i++) {
     Serial.println(targetQueue[i]);
   }
