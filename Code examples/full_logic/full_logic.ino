@@ -1,7 +1,9 @@
-using namespace std;
+#include <Arduino_AVRSTL.h>
 #include "SparkFun_ProDriver_TC78H670FTG_Arduino_Library.h"
 #include <ezButton.h>
-#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
 
 PRODRIVER myProDriver; //Create instance of driver
 
@@ -11,6 +13,7 @@ const int IR1 = A0;
 const int IR2 = A3;
 const int Button1 = A1;
 const int Button2 = A2;
+int queueSize = 0;
 
 bool limit;
 int dir = 0;
@@ -19,8 +22,6 @@ int init_light_reading;
 String currentPos;
 String targetPos;
 const char *sequence[5] = {"LEFT", "1", "2", "3", "RIGHT"};
-std::vector<char> myList = {"LEFT", "1", "2", "3", "RIGHT"};
-Serial.println(myList);
 const char *targetQueue[3];
 int currentIndex;
 int targetIndex;
@@ -51,11 +52,17 @@ bool ReadPin(int pinNumber) {
 // function to set the target position whenever a button is read LOW due to PULLUP mode
 char ReadTarget() {
   if (ReadPin(Button1) == LOW) {
-    targetPos = "1";
-  }
+    int n = sizeof(targetQueue) / sizeof(*targetQueue);
+    bool exists = std::find(targetQueue, targetQueue + n, 3) != targetQueue + n;
+    if (exists) {
+        std::cout << "Element found";
+    } else {
+        targetQueue[queueSize++] = "1";
+    }
+}
 
   else if (ReadPin(Button2) == LOW) {
-    targetPos = "2";
+    targetQueue[queueSize++] = "2";
   }
 }
 
@@ -94,24 +101,6 @@ bool ReadIRSensor(int IR_pin) {
   }
   else {
     return 1;
-  }
-}
-
-
-
-boolean arrayIncludeElement(int array[], int element) {
-  for (int i = 0; i < max; i++) {
-      if (array[i] == element) {
-          return true;
-      }
-    }
-  return false;
-  }
-
-
-void AddToQueue() {
-  if (arrayIncludeElement(sequence, targetPos) == false) {
-    
   }
 }
 
@@ -160,13 +149,15 @@ void setup() {
   pinMode(11, INPUT_PULLUP);
   pinMode(A1, INPUT_PULLUP);
   pinMode(A2, INPUT_PULLUP);
-  myProDriver.begin();
-  init_light_reading = analogRead(IR1);
-  Startup();
+//  myProDriver.begin();
+//  init_light_reading = analogRead(IR1);
+//  Startup();
 }
 
 void loop() {
-  Serial.println(ReadPin(Button1));
+  for (int i=0; i<3; i++) {
+    Serial.println(targetQueue[i]);
+  }
 
   ReadTarget();
   ReadCurrent();
