@@ -16,7 +16,6 @@ int dir = 0;
 int init_light_reading;
 
 int currentPos;
-int targetPos;
 const int sequence[5] = {0, 1, 2, 3, 4};
 int targetQueue[3];
 int currentIndex;
@@ -121,6 +120,8 @@ bool ReadIRSensor(int IR_pin) {
  * if not it will move based on the direction given above
  */
 void MoveToTarget() {
+  int targetPos = targetQueue[0];
+  Serial.println(targetPos);
   if (targetPos != NULL) {
     for (int i=0; i < 5; i++) {
       if (targetPos == sequence[i]) {
@@ -141,6 +142,10 @@ void MoveToTarget() {
 
     if (targetPos == currentPos) {
       Serial.println("reached target");
+      // once reached, remove the first element from the array
+      for (int i=1; i<3; i++) {
+        targetQueue[i-1] = targetQueue[i];
+      }
     }
     else {
       myProDriver.step(1, dir);
@@ -155,13 +160,12 @@ void setup() {
   pinMode(11, INPUT_PULLUP);
   pinMode(A1, INPUT_PULLUP);
   pinMode(A2, INPUT_PULLUP);
-//  myProDriver.begin();
-//  init_light_reading = analogRead(IR1);
-//  Startup();
+  myProDriver.begin();
+  init_light_reading = analogRead(IR1);
+  Startup();
 }
 
 void loop() {
-  Serial.println(sizeof(targetQueue));
   for (int i=0; i<3; i++) {
     Serial.println(targetQueue[i]);
   }
@@ -170,8 +174,6 @@ void loop() {
   ReadCurrent();
   Serial.print("current position: " ); 
   Serial.println(currentPos);
-  Serial.print("target position: "); 
-  Serial.println(targetPos);
 
   MoveToTarget();
   delay(500);
