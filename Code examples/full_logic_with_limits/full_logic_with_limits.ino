@@ -50,7 +50,7 @@ char ReadTarget() {
   int queueSize = 0;
   // reset queue size based on position of first non-zero
   for (int i = 0; i < 4; i++) {
-    if (targetQueue[i] != NULL) {
+    if (targetQueue[i] == NULL || targetQueue[i] == 0) {
       queueSize = i;
     }
   }
