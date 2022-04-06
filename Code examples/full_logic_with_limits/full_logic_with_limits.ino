@@ -46,11 +46,12 @@ bool ReadPin(int pinNumber) {
 }
 
 
-// function to set the target position whenever a button is read LOW due to PULLUP mode
+// function to set the target position to the queue whenever a button is read LOW due to PULLUP mode
 char ReadTarget() {
 
   int queueSize = 0;
-  // reset queue size based on position of first zero
+  // reset queueSize based on position of first zero
+  // this queueSize will be used as the index to add the latest element to the list
   for (int i = 0; i < 5; i++) {
     if (targetQueue[i] == 0) {
       queueSize = i;
@@ -62,11 +63,13 @@ char ReadTarget() {
   
   if (ReadPin(Button1) == LOW) {
     bool elementInside = false;
+    // if any element inside the queue is I, this means that the element is already inside
     for (int i = 0; i < 4; i++) {
       if (targetQueue[i] == 1) {
         elementInside = true;
       }
     }
+    // only add the element to the queue if it was not inside already
     if (elementInside == false) {
       targetQueue[queueSize++] = 1;
     }
@@ -179,11 +182,13 @@ void MoveToTarget() {
     }
 
     // reverses the directions if it hits the left or right limit
+    // if its at the left limit, it should move right
     else if (currentPos == 0) {
       dir = 1;
       myProDriver.step(1, dir);
     }
 
+    // if its at the right limit, it should move left
     else if (currentPos == 4) {
       dir = 0;
       myProDriver.step(1, dir);
@@ -202,12 +207,15 @@ void setup() {
   pinMode(11, INPUT_PULLUP);
   pinMode(A1, INPUT_PULLUP);
   pinMode(A2, INPUT_PULLUP);
+  pinMode(A4, INPUT_PULLUP);
   myProDriver.begin();
+  // get initial reading for comparison when motor moves past
   init_light_reading = analogRead(IR1);
   Startup();
 }
 
 void loop() {
+  Serial.println("Target Queue Elements:");
   for (int i=0; i<3; i++) {
     Serial.println(targetQueue[i]);
   }
@@ -215,6 +223,5 @@ void loop() {
   ReadTarget();
   ReadCurrent();
   Serial.println((String)"current position: " + currentPos); 
-  // delay(1000);
   MoveToTarget();
 }
