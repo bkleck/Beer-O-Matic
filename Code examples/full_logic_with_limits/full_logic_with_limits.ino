@@ -9,7 +9,6 @@ const int IR1 = A0;
 const int IR2 = A3;
 const int Button1 = A1;
 const int Button2 = A2;
-int queueSize = 0;
 
 bool limit;
 
@@ -47,9 +46,20 @@ bool ReadPin(int pinNumber) {
 
 // function to set the target position whenever a button is read LOW due to PULLUP mode
 char ReadTarget() {
+
+  int queueSize = 0;
+  // reset queue size based on position of first non-zero
+  for (int i = 0; i < 4; i++) {
+    if (targetQueue[i] != NULL) {
+      queueSize = i;
+    }
+  }
+  Serial.println((String) "queue size:" + queueSize);
+
+  
   if (ReadPin(Button1) == LOW) {
     bool elementInside = false;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
       if (targetQueue[i] == 1) {
         elementInside = true;
       }
@@ -61,7 +71,7 @@ char ReadTarget() {
 
   else if (ReadPin(Button2) == LOW) {
     bool elementInside = false;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
       if (targetQueue[i] == 2) {
         elementInside = true;
       }
@@ -101,7 +111,7 @@ char ReadCurrent() {
  */
 bool ReadIRSensor(int IR_pin) {
   int light_reading = analogRead(IR_pin);
-  if (light_reading <= init_light_reading - 25) {
+  if (light_reading <= init_light_reading - 150) {
     Serial.println("Something fat passed by: " + IR_pin);
     return 0;
   }
@@ -147,6 +157,7 @@ void MoveToTarget() {
       for (int i=1; i<3; i++) {
         targetQueue[i-1] = targetQueue[i];
       }
+    }
 
     // reverses the directions if it hits the left or right limit
     else if (currentPos == 0) {
@@ -188,4 +199,5 @@ void loop() {
   Serial.println(currentPos);
 
   MoveToTarget();
+  delay(1000);
 }
