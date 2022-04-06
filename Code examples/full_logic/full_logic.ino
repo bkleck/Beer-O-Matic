@@ -12,6 +12,7 @@ const int Button2 = A2;
 int queueSize = 0;
 
 bool limit;
+
 int dir = 0;
 int init_light_reading;
 
@@ -27,7 +28,7 @@ int targetIndex;
  */
 void Startup() {
   while (ReadPin(leftLimit)) {
-    myProDriver.step(200, dir);
+    myProDriver.step(1, dir);
   }
 
   Serial.println("reached left limit");
@@ -100,7 +101,7 @@ char ReadCurrent() {
  */
 bool ReadIRSensor(int IR_pin) {
   int light_reading = analogRead(IR_pin);
-  if (light_reading <= init_light_reading - 100) {
+  if (light_reading <= init_light_reading - 25) {
     Serial.println("Something fat passed by: " + IR_pin);
     return 0;
   }
@@ -176,5 +177,4 @@ void loop() {
   Serial.println(currentPos);
 
   MoveToTarget();
-  delay(500);
 }
