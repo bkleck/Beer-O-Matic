@@ -17,7 +17,7 @@ int init_light_reading;
 
 int currentPos;
 const int sequence[5] = {0, 1, 2, 3, 4};
-int targetQueue[3];
+int targetQueue[3] = {0, 0, 0};
 int currentIndex;
 int targetIndex;
 
@@ -48,10 +48,11 @@ bool ReadPin(int pinNumber) {
 char ReadTarget() {
 
   int queueSize = 0;
-  // reset queue size based on position of first non-zero
-  for (int i = 0; i < 4; i++) {
-    if (targetQueue[i] == NULL || targetQueue[i] == 0) {
+  // reset queue size based on position of first zero
+  for (int i = 0; i < 5; i++) {
+    if (targetQueue[i] == 0) {
       queueSize = i;
+      break;
     }
   }
   Serial.println((String) "queue size:" + queueSize);
@@ -132,7 +133,7 @@ bool ReadIRSensor(int IR_pin) {
  */
 void MoveToTarget() {
   int targetPos = targetQueue[0];
-  Serial.println(targetPos);
+  Serial.println((String) "Target position: " + targetPos);
   if (targetPos != NULL) {
     for (int i=0; i < 5; i++) {
       if (targetPos == sequence[i]) {
@@ -195,9 +196,8 @@ void loop() {
 
   ReadTarget();
   ReadCurrent();
-  Serial.print("current position: " ); 
-  Serial.println(currentPos);
-
-  MoveToTarget();
+  Serial.println((String) "Button" + ReadPin(Button1));
+  Serial.println((String)"current position: " + currentPos); 
   delay(1000);
+  MoveToTarget();
 }
