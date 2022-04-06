@@ -7,8 +7,10 @@ const int leftLimit = 12;
 const int rightLimit = 11;
 const int IR1 = A0;
 const int IR2 = A3;
+const int IR3 = A5;
 const int Button1 = A1;
 const int Button2 = A2;
+const int Button3 = A4;
 
 bool limit;
 
@@ -81,6 +83,18 @@ char ReadTarget() {
       targetQueue[queueSize++] = 2;
     }
 }
+
+  else if (ReadPin(Button3) == LOW) {
+    bool elementInside = false;
+    for (int i = 0; i < 4; i++) {
+      if (targetQueue[i] == 3) {
+        elementInside = true;
+      }
+    }
+    if (elementInside == false) {
+      targetQueue[queueSize++] = 3;
+    }
+}
 }
 
 
@@ -101,6 +115,10 @@ char ReadCurrent() {
 
   else if (ReadIRSensor(IR2) == LOW) {
     currentPos = 2;
+  }
+  
+  else if (ReadIRSensor(IR3) == LOW) {
+    currentPos = 3;
   }
 }
 
@@ -196,8 +214,7 @@ void loop() {
 
   ReadTarget();
   ReadCurrent();
-  Serial.println((String) "Button" + ReadPin(Button1));
   Serial.println((String)"current position: " + currentPos); 
-  delay(1000);
+  // delay(1000);
   MoveToTarget();
 }
