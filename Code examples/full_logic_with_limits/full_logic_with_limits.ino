@@ -3,6 +3,7 @@
 
 PRODRIVER myProDriver; //Create instance of driver
 
+// for main mechanism
 const int leftLimit = 12;
 const int rightLimit = 11;
 const int IR1 = A0;
@@ -11,6 +12,21 @@ const int IR3 = A5;
 const int Button1 = A1;
 const int Button2 = A2;
 const int Button3 = A4;
+
+// for pump
+#define trigPin 27
+#define echoPin 33
+#define relayPin 22
+float duration, distance, time_required;
+float final_distance = 7; // 5(ultra to cup top) + 2 (buffer)
+float flow_rate = 22.2; //cm^3 per second (to be determined)
+float surface_area = 43; // (to be determined)
+float height_rate = flow_rate/surface_area; //rate of height increase
+int count = 0; //counter for millis
+float max_time = 20; //maximum pump run time
+//int buffer_time = 2;// time require for water to reach tip of tube from tank(seconds)
+long previousMillis = 0;
+
 
 bool limit;
 
@@ -75,7 +91,7 @@ char ReadTarget() {
     }
 }
 
-  else if (ReadPin(Button2) == LOW) {
+  if (ReadPin(Button2) == LOW) {
     bool elementInside = false;
     for (int i = 0; i < 4; i++) {
       if (targetQueue[i] == 2) {
@@ -87,7 +103,7 @@ char ReadTarget() {
     }
 }
 
-  else if (ReadPin(Button3) == LOW) {
+  if (ReadPin(Button3) == LOW) {
     bool elementInside = false;
     for (int i = 0; i < 4; i++) {
       if (targetQueue[i] == 3) {
@@ -198,6 +214,51 @@ void MoveToTarget() {
       myProDriver.step(1, dir);
     }
   }
+}
+
+
+/* function to calculate distance between cup and pump
+ *  this is done by calculating the time for ultrasound wave to reflect
+ *  and divide it by the speed of sound
+ */
+void calc_distance (){
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+  distance = (duration*.0343)/2;
+}
+
+/* function to dispense liquid from the pump after distance has been calculated
+ * make use of count to ensure it only dispenses once
+ */
+void measure_dispense() {
+  calc_distance();
+  Serial.println(distance);
+  time_required = (distance-final_distance)/height_rate;
+  if (time_required > max_time){
+    time_required = max_time;
+  }
+  Serial.println(time_required);
+
+  long currentMillis = millis();
+  count = 0;
+  previousMillis = currentMillis;
+  while (currentMillis - previousMillis < time_required*1000) {
+    if (count == 0){
+      digitalWrite(relayPin,HIGH);
+      previousMillis = currentMillis;
+      count = 1;
+    }
+    digitalWrite(relayPin,HIGH);
+    currentMillis = millis();
+    }
+  
+  digitalWrite(relayPin,LOW);
+
 }
 
 
