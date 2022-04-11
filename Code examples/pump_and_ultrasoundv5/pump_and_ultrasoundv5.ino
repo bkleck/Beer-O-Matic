@@ -18,10 +18,11 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(relayPin, OUTPUT);
+  measure_dispense();
 }
 
 void loop(){
-  measure_dispense();
+  // measure_dispense();
 }
 
 void measure_dispense() {

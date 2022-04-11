@@ -18,7 +18,7 @@ const int Button3 = A4;
 #define echoPin 33
 #define relayPin 22
 float duration, distance, time_required;
-float final_distance = 7; // 5(ultra to cup top) + 2 (buffer)
+float final_distance = 5; // 5(ultra to cup top) + 2 (buffer)
 float flow_rate = 22.2; //cm^3 per second (to be determined)
 float surface_area = 43; // (to be determined)
 float height_rate = flow_rate/surface_area; //rate of height increase
@@ -149,7 +149,7 @@ char ReadCurrent() {
  */
 bool ReadIRSensor(int IR_pin) {
   int light_reading = analogRead(IR_pin);
-  if (light_reading <= init_light_reading - 150) {
+  if (light_reading <= init_light_reading - 100) {
     Serial.println("Something fat passed by: " + IR_pin);
     return 0;
   }
@@ -170,7 +170,7 @@ bool ReadIRSensor(int IR_pin) {
  */
 void MoveToTarget() {
   int targetPos = targetQueue[0];
-  // Serial.println((String) "Target position: " + targetPos);
+  Serial.println((String) "Target position: " + targetPos);
   if (targetPos != NULL) {
     for (int i=0; i < 5; i++) {
       if (targetPos == sequence[i]) {
@@ -253,7 +253,8 @@ void measure_dispense() {
   count = 0;
   previousMillis = currentMillis;
   while (currentMillis - previousMillis < time_required*1000) {
-    Serial.println("Dispensing!!!");
+    // ReadTarget();
+    // Serial.println("Dispensing!!!");
     if (count == 0){
       digitalWrite(relayPin,HIGH);
       previousMillis = currentMillis;
@@ -275,6 +276,9 @@ void setup() {
   pinMode(A1, INPUT_PULLUP);
   pinMode(A2, INPUT_PULLUP);
   pinMode(A4, INPUT_PULLUP);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(relayPin, OUTPUT);
   myProDriver.begin();
   // get initial reading for comparison when motor moves past
   init_light_reading = analogRead(IR1);
@@ -282,13 +286,13 @@ void setup() {
 }
 
 void loop() {
-  // Serial.println("Target Queue Elements:");
+  Serial.println("Target Queue Elements:");
   for (int i=0; i<3; i++) {
-    // Serial.println(targetQueue[i]);
+    Serial.println(targetQueue[i]);
   }
 
   ReadTarget();
   ReadCurrent();
-  // Serial.println((String)"current position: " + currentPos); 
+  Serial.println((String)"current position: " + currentPos); 
   MoveToTarget();
 }
