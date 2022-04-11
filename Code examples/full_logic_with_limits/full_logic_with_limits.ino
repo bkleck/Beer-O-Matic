@@ -74,7 +74,7 @@ char ReadTarget() {
       break;
     }
   }
-  Serial.println((String) "queue size:" + queueSize);
+  // Serial.println((String) "queue size:" + queueSize);
 
   
   if (ReadPin(Button1) == LOW) {
@@ -170,7 +170,7 @@ bool ReadIRSensor(int IR_pin) {
  */
 void MoveToTarget() {
   int targetPos = targetQueue[0];
-  Serial.println((String) "Target position: " + targetPos);
+  // Serial.println((String) "Target position: " + targetPos);
   if (targetPos != NULL) {
     for (int i=0; i < 5; i++) {
       if (targetPos == sequence[i]) {
@@ -190,14 +190,15 @@ void MoveToTarget() {
     }
 
     if (targetPos == currentPos) {
-      Serial.println("reached target");
+      Serial.println("reached target, dispensing liquid");
+      // once reach the position, dispense liquid
+      measure_dispense();
+      Serial.println("Finished dispensing");
+      
       // once reached, remove the first element from the array
       for (int i=1; i<3; i++) {
         targetQueue[i-1] = targetQueue[i];
       }
-
-      // once reach the position, dispense liquid
-      // measure_dispense();
     }
 
     // reverses the directions if it hits the left or right limit
@@ -233,6 +234,7 @@ void calc_distance (){
 
   duration = pulseIn(echoPin, HIGH);
   distance = (duration*.0343)/2;
+  Serial.println(distance);
 }
 
 /* function to dispense liquid from the pump after distance has been calculated
@@ -251,6 +253,7 @@ void measure_dispense() {
   count = 0;
   previousMillis = currentMillis;
   while (currentMillis - previousMillis < time_required*1000) {
+    Serial.println("Dispensing!!!");
     if (count == 0){
       digitalWrite(relayPin,HIGH);
       previousMillis = currentMillis;
@@ -279,13 +282,13 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("Target Queue Elements:");
+  // Serial.println("Target Queue Elements:");
   for (int i=0; i<3; i++) {
-    Serial.println(targetQueue[i]);
+    // Serial.println(targetQueue[i]);
   }
 
   ReadTarget();
   ReadCurrent();
-  Serial.println((String)"current position: " + currentPos); 
+  // Serial.println((String)"current position: " + currentPos); 
   MoveToTarget();
 }
