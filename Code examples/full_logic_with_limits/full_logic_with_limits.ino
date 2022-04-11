@@ -195,6 +195,9 @@ void MoveToTarget() {
       for (int i=1; i<3; i++) {
         targetQueue[i-1] = targetQueue[i];
       }
+
+      // once reach the position, dispense liquid
+      // measure_dispense();
     }
 
     // reverses the directions if it hits the left or right limit

@@ -1,6 +1,6 @@
 #define trigPin 27
 #define echoPin 33
-#define relayPin 12
+#define relayPin 22
 float duration, distance, time_required;
 float final_distance = 7; // 5(ultra to cup top) + 2 (buffer)
 float flow_rate = 22.2; //cm^3 per second (to be determined)
@@ -22,8 +22,8 @@ void setup() {
 
 void loop(){
   measure_dispense();
-  delay(5000);
 }
+
 void measure_dispense() {
   // put your main code here, to run repeatedly:
   calc_distance();
