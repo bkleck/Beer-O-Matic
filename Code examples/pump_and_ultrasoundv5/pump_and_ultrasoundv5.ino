@@ -2,7 +2,7 @@
 #define echoPin 33
 #define relayPin 22
 float duration, distance, time_required;
-float final_distance = 7; // 5(ultra to cup top) + 2 (buffer)
+float final_distance = 10; // 5(ultra to cup top) + 2 (buffer)
 float flow_rate = 22.2; //cm^3 per second (to be determined)
 float surface_area = 43; // (to be determined)
 float height_rate = flow_rate/surface_area; //rate of height increase
@@ -18,11 +18,19 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(relayPin, OUTPUT);
-  measure_dispense();
 }
 
 void loop(){
-  // measure_dispense();
+  calc_distance();
+  int diff = distance - final_distance;
+  Serial.println((String) "difference: " + diff);
+  if (diff > 0) {
+    digitalWrite(relayPin,HIGH);
+    delay(500);
+  }
+  else {
+    digitalWrite(relayPin,LOW);
+  }
 }
 
 void measure_dispense() {
@@ -61,4 +69,5 @@ void calc_distance (){
 
   duration = pulseIn(echoPin, HIGH);
   distance = (duration*.0343)/2;
+  Serial.println((String) "distance: " + distance);
 }

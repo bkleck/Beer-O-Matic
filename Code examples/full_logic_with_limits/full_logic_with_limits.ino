@@ -9,9 +9,9 @@ const int rightLimit = 11;
 const int IR1 = A0;
 const int IR2 = A3;
 const int IR3 = A5;
-const int Button1 = A1;
-const int Button2 = A2;
-const int Button3 = A4;
+const int Button1 = 50;
+const int Button2 = 51;
+const int Button3 = 52;
 
 // for pump
 #define trigPin 27
@@ -75,9 +75,67 @@ char ReadTarget() {
     }
   }
   // Serial.println((String) "queue size:" + queueSize);
-
   
   if (ReadPin(Button1) == LOW) {
+    Serial.println("button 1 pressed");
+    bool elementInside1 = false;
+    // if any element inside the queue is I, this means that the element is already inside
+    for (int i = 0; i < 4; i++) {
+      if (targetQueue[i] == 1) {
+        elementInside1 = true;
+      }
+    }
+    // only add the element to the queue if it was not inside already
+    if (elementInside1 == false) {
+      targetQueue[queueSize++] = 1;
+    }
+}
+
+  if (ReadPin(Button2) == LOW) {
+    Serial.println("button 2 pressed");
+    bool elementInside2 = false;
+    for (int i = 0; i < 4; i++) {
+      if (targetQueue[i] == 2) {
+        elementInside2 = true;
+      }
+    }
+    if (elementInside2 == false) {
+      targetQueue[queueSize++] = 2;
+    }
+}
+
+  if (ReadPin(Button3) == LOW) {
+  Serial.println("button 3 pressed");
+    bool elementInside3 = false;
+    for (int i = 0; i < 4; i++) {
+      if (targetQueue[i] == 3) {
+        elementInside3 = true;
+      }
+    }
+    if (elementInside3 == false) {
+      targetQueue[queueSize++] = 3;
+    }
+}
+}
+
+// function to set the target position to the queue whenever a button is read LOW due to PULLUP mode
+char ReadTargetOpposite() {
+
+  int queueSize = 0;
+  // reset queueSize based on position of first zero
+  // this queueSize will be used as the index to add the latest element to the list
+  for (int i = 0; i < 5; i++) {
+    if (targetQueue[i] == 0) {
+      queueSize = i;
+      break;
+    }
+  }
+  // Serial.println((String) "queue size:" + queueSize);
+
+  Serial.println((String) "Button1" + digitalRead(Button1));
+  Serial.println((String) "Button2" + digitalRead(Button2));
+  Serial.println((String) "Button3" + digitalRead(Button3));
+  if (ReadPin(Button1) == HIGH) {
     bool elementInside = false;
     // if any element inside the queue is I, this means that the element is already inside
     for (int i = 0; i < 4; i++) {
@@ -91,7 +149,7 @@ char ReadTarget() {
     }
 }
 
-  if (ReadPin(Button2) == LOW) {
+  if (ReadPin(Button2) == HIGH) {
     bool elementInside = false;
     for (int i = 0; i < 4; i++) {
       if (targetQueue[i] == 2) {
@@ -103,7 +161,7 @@ char ReadTarget() {
     }
 }
 
-  if (ReadPin(Button3) == LOW) {
+  if (ReadPin(Button3) == HIGH) {
     bool elementInside = false;
     for (int i = 0; i < 4; i++) {
       if (targetQueue[i] == 3) {
@@ -190,10 +248,8 @@ void MoveToTarget() {
     }
 
     if (targetPos == currentPos) {
-      Serial.println("reached target, dispensing liquid");
       // once reach the position, dispense liquid
       measure_dispense();
-      Serial.println("Finished dispensing");
       
       // once reached, remove the first element from the array
       for (int i=1; i<3; i++) {
@@ -253,8 +309,7 @@ void measure_dispense() {
   count = 0;
   previousMillis = currentMillis;
   while (currentMillis - previousMillis < time_required*1000) {
-    // ReadTarget();
-    // Serial.println("Dispensing!!!");
+    
     if (count == 0){
       digitalWrite(relayPin,HIGH);
       previousMillis = currentMillis;
@@ -262,8 +317,13 @@ void measure_dispense() {
     }
     digitalWrite(relayPin,HIGH);
     currentMillis = millis();
+    // ReadTarget();
+    Serial.println("Target Queue Elements:");
+    for (int i=0; i<3; i++) {
+      Serial.println(targetQueue[i]);
+  }
     }
-  
+
   digitalWrite(relayPin,LOW);
 
 }
@@ -273,9 +333,11 @@ void setup() {
   Serial.begin(115200);
   pinMode(12, INPUT_PULLUP);
   pinMode(11, INPUT_PULLUP);
-  pinMode(A1, INPUT_PULLUP);
-  pinMode(A2, INPUT_PULLUP);
-  pinMode(A4, INPUT_PULLUP);
+  
+  pinMode(50, INPUT_PULLUP);
+  pinMode(51, INPUT_PULLUP);
+  pinMode(52, INPUT_PULLUP);
+  
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(relayPin, OUTPUT);
@@ -286,6 +348,9 @@ void setup() {
 }
 
 void loop() {
+  Serial.println((String)"ir3: " + analogRead(IR3)); 
+  Serial.println((String)"ir2: " + analogRead(IR2)); 
+  Serial.println((String)"ir1: " + analogRead(IR1)); 
   Serial.println("Target Queue Elements:");
   for (int i=0; i<3; i++) {
     Serial.println(targetQueue[i]);
