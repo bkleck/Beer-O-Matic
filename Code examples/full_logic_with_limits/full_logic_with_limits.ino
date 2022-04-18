@@ -118,62 +118,6 @@ char ReadTarget() {
 }
 }
 
-// function to set the target position to the queue whenever a button is read LOW due to PULLUP mode
-char ReadTargetOpposite() {
-
-  int queueSize = 0;
-  // reset queueSize based on position of first zero
-  // this queueSize will be used as the index to add the latest element to the list
-  for (int i = 0; i < 5; i++) {
-    if (targetQueue[i] == 0) {
-      queueSize = i;
-      break;
-    }
-  }
-  // Serial.println((String) "queue size:" + queueSize);
-
-  Serial.println((String) "Button1" + digitalRead(Button1));
-  Serial.println((String) "Button2" + digitalRead(Button2));
-  Serial.println((String) "Button3" + digitalRead(Button3));
-  if (ReadPin(Button1) == HIGH) {
-    bool elementInside = false;
-    // if any element inside the queue is I, this means that the element is already inside
-    for (int i = 0; i < 4; i++) {
-      if (targetQueue[i] == 1) {
-        elementInside = true;
-      }
-    }
-    // only add the element to the queue if it was not inside already
-    if (elementInside == false) {
-      targetQueue[queueSize++] = 1;
-    }
-}
-
-  if (ReadPin(Button2) == HIGH) {
-    bool elementInside = false;
-    for (int i = 0; i < 4; i++) {
-      if (targetQueue[i] == 2) {
-        elementInside = true;
-      }
-    }
-    if (elementInside == false) {
-      targetQueue[queueSize++] = 2;
-    }
-}
-
-  if (ReadPin(Button3) == HIGH) {
-    bool elementInside = false;
-    for (int i = 0; i < 4; i++) {
-      if (targetQueue[i] == 3) {
-        elementInside = true;
-      }
-    }
-    if (elementInside == false) {
-      targetQueue[queueSize++] = 3;
-    }
-}
-}
-
 
 // function to set the current position whenever a limit switch or IR sensor is activated
 // as the pins are on PULLUP mode, they are activated when read as LOW
@@ -348,9 +292,6 @@ void setup() {
 }
 
 void loop() {
-  Serial.println((String)"ir3: " + analogRead(IR3)); 
-  Serial.println((String)"ir2: " + analogRead(IR2)); 
-  Serial.println((String)"ir1: " + analogRead(IR1)); 
   Serial.println("Target Queue Elements:");
   for (int i=0; i<3; i++) {
     Serial.println(targetQueue[i]);
