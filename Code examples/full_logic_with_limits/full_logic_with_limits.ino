@@ -62,6 +62,7 @@ bool ReadPin(int pinNumber) {
 }
 
 
+
 // function to set the target position to the queue whenever a button is read LOW due to PULLUP mode
 char ReadTarget() {
 
@@ -173,7 +174,7 @@ bool ReadIRSensor(int IR_pin) {
 void MoveToTarget() {
   int targetPos = targetQueue[0];
   Serial.println((String) "Target position: " + targetPos);
-  if (targetPos != NULL) {
+  if ((targetPos != NULL) & (targetPos != 0)) {
     for (int i=0; i < 5; i++) {
       if (targetPos == sequence[i]) {
         targetIndex = i;
@@ -205,17 +206,17 @@ void MoveToTarget() {
     // if its at the left limit, it should move right
     else if (currentPos == 0) {
       dir = 1;
-      myProDriver.step(1, dir);
+      myProDriver.step(3, dir);
     }
 
     // if its at the right limit, it should move left
     else if (currentPos == 4) {
       dir = 0;
-      myProDriver.step(1, dir);
+      myProDriver.step(3, dir);
     }
 
     else {
-      myProDriver.step(1, dir);
+      myProDriver.step(3, dir);
     }
   }
 }
@@ -255,20 +256,19 @@ void measure_dispense() {
   while (currentMillis - previousMillis < time_required*1000) {
     
     if (count == 0){
+      myProDriver.disable();
       digitalWrite(relayPin,HIGH);
       previousMillis = currentMillis;
       count = 1;
     }
+    myProDriver.disable();
     digitalWrite(relayPin,HIGH);
     currentMillis = millis();
     // ReadTarget();
-    Serial.println("Target Queue Elements:");
-    for (int i=0; i<3; i++) {
-      Serial.println(targetQueue[i]);
-  }
     }
 
   digitalWrite(relayPin,LOW);
+  myProDriver.enable();
 
 }
 
