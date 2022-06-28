@@ -7,6 +7,8 @@ Automatic Beer Dispenser
 * [Introduction](#introduction)
 * [Mechanical Design](#mechanical-design)
 * [Code Documentation](#code-documentation)
+* [Logic Diagram](#logic-diagram)
+* [Wiring Diagram](#wiring-diagram)
 
 ## Introduction
 This project was done as part of the **_ME102B Mechatronics Design_** course during my exchange in UC Berkeley. We had to produce a working prototype by the end of the semester, that solves a problem in real life. We had to do both **_mechanical design and code design_** for our prototype to work.
@@ -34,3 +36,16 @@ Our `MoveToTarget()` function does exactly what is said. The `targetPos` variabl
 Firstly, to **_calculate the distance between the cup and pump_**, we have an **_ultrasound sensor_** attached to the spout. In the `calc_distance()` function, we will turn the trigger pin of this sensor from LOW to HIGH to LOW, and calculate the **_duration for the ultrasound wave to emit and reflect back_** from the bottom of the cup. The distance is then calculated by deriving from the **_duration recorded and the speed of sound in air_**.
 
 Next, we will use the `measure_dispense()` function to actually dispense the beer in the given time. Firstly, we model our cup using a standard size of **_500ml_**, and we want the cup to be completely filled in **_~3s_**. Hence, we calculate the **_flow rate using volume/time_**. Afterwards, we calculate the rate of height increase required using **_height_rate = flow rate/surface area_**. Lastly, the **_time required for the dispense will be (distance - final_distance)/height_rate_**. We will then activate the relay pin to turn on the valve for the given amount of time. Another safety feature here is that when the valve is open, the motor will be turned off, and vice versa, to **_prevent any spillage_** from movement during dispensing.
+
+
+## Logic Diagram
+<p align="center">
+  <img src='https://user-images.githubusercontent.com/77097236/176107367-999a6f41-9dd7-4474-913a-12f6d676f4b9.jpg' width='450' height='400'>
+  
+  <img src='https://user-images.githubusercontent.com/77097236/176107897-e9a0bc9a-1457-4774-b63e-8c4274b12ab6.jpg' width='550' height='400'>
+</p>
+
+## Wiring Diagram
+<p align="center">
+  <img src='https://user-images.githubusercontent.com/77097236/176108375-bbb05da6-318a-4de0-8853-694d5d2277c4.jpg' width='1000' height='500'>
+</p>
